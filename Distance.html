@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no" />
+    <style type="text/css">
+      html {
+          height: 70%
+      }
+      body {
+          height: 100%;
+          margin: 0;
+          padding: 0
+      }
+      #map {
+          height: 100%
+      }
+    </style>
+<script type="text/javascript"
+      src="http://maps.googleapis.com/maps/api/js?sensor=false&extension=.js">
+</script>
+</head>
+
+<body>
+  <div id="map" style="width:100%; height:100%"></div>
+  <br />
+  <center>
+      <div id="status">Mueve los marcadores.</div>
+      <div id="divCircle"></div>
+      <div id="divPoint"></div>
+      <div id="divDistance"></div>
+  </center>
+  
+  <script type="text/javascript">
+  var map;
+  var center = new google.maps.LatLng(14.637381691871765, -90.51254870069886);
+  var x = new google.maps.LatLng(14.637058870425836, -90.51146508825684);
+  var mapOptions;
+  var marker;
+  var markerCenter;
+  var error = 15;
+  var radio = 100; //metros
+  
+  mapOptions = {
+      center: center,
+      zoom: 15,
+      mapTypeId: google.maps.MapTypeId.ROADMAP
+  };
+  
+  function initialize() {
+      map = new google.maps.Map(document.getElementById("map"), mapOptions);
+  
+      marker = new google.maps.Marker({
+          position: x,
+          draggable: true
+      });
+      marker.setMap(map);
+      marker.setAnimation(google.maps.Animation.DROP);
+  
+      markerCenter = new google.maps.Marker({
+          position: center,
+          draggable: true
+      });
+      markerCenter.setMap(map);
+  
+      var myCity = new google.maps.Circle({
+          center: center,
+          radius: radio,
+          strokeColor: "#0000FF",
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: "#0000FF",
+          fillOpacity: 0.4,
+          editable: false
+      });
+      myCity.bindTo('center', markerCenter, 'position');
+      myCity.setMap(map);
+  
+      google.maps.event.addListener(marker, 'dragend', function () {
+          if (calcDistance(myCity.getCenter(), marker.getPosition()) > (radio + error)) {
+              document.getElementById("status").innerHTML = "El punto est&#225; fuera del &#193;rea.";
+              document.getElementById("divCircle").innerHTML = "Centro: " + myCity.getCenter();
+              document.getElementById("divPoint").innerHTML = "Punto: " + marker.getPosition();
+              document.getElementById("divDistance").innerHTML = "Distancia (mts) : " + calcDistance(myCity.getCenter(),marker.getPosition());
+  
+          } else {
+              document.getElementById("status").innerHTML = "El punto se encuentra dentro del &#193;rea.";
+              document.getElementById("divCircle").innerHTML = "Centro: " + myCity.getCenter();
+              document.getElementById("divPoint").innerHTML = "Punto: " + marker.getPosition();
+              document.getElementById("divDistance").innerHTML = "Distancia (mts) : " + calcDistance(myCity.getCenter(),marker.getPosition());
+          }
+          //alert(distance(myCity.getCenter(), marker.getPosition()));
+      });
+  
+      google.maps.event.addListener(markerCenter, 'dragend', function () {
+          if (calcDistance(myCity.getCenter(), marker.getPosition()) > (radio + error)) {
+              document.getElementById("status").innerHTML = "El punto est&#225; fuera del &#193;rea.";
+              document.getElementById("divCircle").innerHTML = "Centro: " + myCity.getCenter();
+              document.getElementById("divPoint").innerHTML = "Punto: " + marker.getPosition();
+              document.getElementById("divDistance").innerHTML = "Distancia (mts) : " + calcDistance(myCity.getCenter(),marker.getPosition());
+          } else {
+              document.getElementById("status").innerHTML = "El punto se encuentra dentro del &#193;rea.";
+              document.getElementById("divCircle").innerHTML = "Centro: " + myCity.getCenter();
+              document.getElementById("divPoint").innerHTML = "Punto: " + marker.getPosition();
+              document.getElementById("divDistance").innerHTML = "Distancia (mts) : " + calcDistance(myCity.getCenter(),marker.getPosition());
+          }
+      });
+  
+      google.maps.event.addListener(map, 'click', function (event) {
+          placeCircle(event.latLng, map);
+      });
+  
+  }
+  
+  //calculates distance between two points in km's
+  function calcDistance(p1, p2) {
+      return (google.maps.geometry.spherical.computeDistanceBetween(p1, p2)).toFixed(2);
+  }
+  
+  function distance(p1, p2) {
+      var R = 6371; // km
+      var dLat = toRad((p2.lat() - p1.lat()));
+      var dLon = toRad((p2.lng() - p1.lng()));
+      var a = Math.sin(dLat / 2) * Math.sin(dLat / 2) + Math.cos(toRad(p1.lat())) * Math.cos(toRad(p1.lat())) * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+      var c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+      var d = R * c;
+      return d * 1000; //De kms a mts
+  }
+  
+  function toRad(Value) {
+      /** Grados a radianes */
+      return Value * Math.PI / 180;
+  }
+  
+  function placeCircle(location, map) {
+      var marker = new google.maps.Marker({
+          position: location,
+          draggable: true
+      });
+      marker.setMap(map);
+      
+      
+      var myCircle = new google.maps.Circle({
+          center: location,
+          radius: radio,
+          strokeColor: "#0000FF",
+          strokeOpacity: 0.8,
+          strokeWeight: 2,
+          fillColor: "#0000FF",
+          fillOpacity: 0.4,
+          editable: false
+      });
+      myCircle.bindTo('center', marker, 'position');
+      myCircle.setMap(map);
+      map.setCenter(location);
+  
+  
+  }
+  google.maps.event.addDomListener(window, 'load', initialize);
+  </script>
+
+</body>
+</html>
