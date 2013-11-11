@@ -1,3 +1,7 @@
+In Action
+==========
+http://jsfiddle.net/gepser/ZBTP7/embedded/result/
+
 GPSDistanceJS
 =============
 
